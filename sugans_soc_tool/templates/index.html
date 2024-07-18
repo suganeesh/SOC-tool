@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sugan's SOC Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        h1 {
+            margin-top: 20px;
+        }
+        .container {
+            width: 80%;
+            max-width: 1000px;
+            background: #fff;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .log {
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .log strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #007BFF;
+        }
+        .log .ip {
+            color: #FF6347;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        #logs {
+            margin-top: 20px;
+        }
+        #search {
+            margin-bottom: 20px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Sugan's SOC Tool</h1>
+    <div class="container">
+        <h2>Collected Logs</h2>
+        <input type="text" id="search" placeholder="Search logs...">
+        <div id="logs"></div>
+    </div>
+    <script>
+        async function fetchLogs() {
+            const response = await fetch('/logs');
+            const logs = await response.json();
+            displayLogs(logs);
+        }
+
+        function displayLogs(logs) {
+            const logsContainer = document.getElementById('logs');
+            logsContainer.innerHTML = '';
+            logs.forEach(log => {
+                const logElement = document.createElement('div');
+                logElement.className = 'log';
+                logElement.innerHTML = `
+                    <strong>${log.filename}</strong>
+                    <span class="ip">IP: ${log.ip}</span>
+                    <pre>${log.content}</pre>
+                `;
+                logsContainer.appendChild(logElement);
+            });
+        }
+
+        window.onload = fetchLogs;
+
+        const socket = io();
+        socket.on('new_log', function(data) {
+            fetchLogs();
+        });
+
+        document.getElementById('search').addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const logs = Array.from(document.getElementsByClassName('log'));
+            logs.forEach(log => {
+                const content = log.innerText.toLowerCase();
+                log.style.display = content.includes(query) ? 'block' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

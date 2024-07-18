@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Sender</title>
+</head>
+<body>
+    <h1>Send Log Data</h1>
+    <form id="logForm">
+        <label for="device_id">Device ID:</label>
+        <input type="text" id="device_id" name="device_id" required>
+        <br><br>
+        <label for="log_data">Log Data:</label>
+        <textarea id="log_data" name="log_data" rows="10" cols="30" required></textarea>
+        <br><br>
+        <button type="submit">Send Log</button>
+    </form>
+    <script>
+        document.getElementById('logForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const device_id = document.getElementById('device_id').value;
+            const log_data = document.getElementById('log_data').value;
+            const response = await fetch('http://0.0.0.0:5000/collect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `device_id=${device_id}&log_data=${log_data}`
+            });
+            const result = await response.json();
+            alert(`Log sent! Server response: ${result.message}`);
+        });
+    </script>
+</body>
+</html>
